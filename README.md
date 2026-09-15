@@ -5,13 +5,13 @@ Minesweeper built in Python with [Pygame](https://www.pygame.org/). Reveal every
 
 ## Features
 
-- **Configurable mine count** — before the board is dealt, drag the on-screen slider to choose anywhere from 10 to 20 mines, then press **Start**.
+- **Configurable mine count**, before the board is dealt, drag the on-screen slider to choose anywhere from 10 to 20 mines, then press **Start**.
 - **10x10 grid board** rendered with Pygame, with each cell drawn as an individual clickable tile.
 - **Safe first click** — the first cell you reveal (and its immediate neighbors) is guaranteed to never contain a mine; mines are only placed after your first move.
-- **Flood-fill reveal** — clicking a cell with zero adjacent mines automatically reveals all of its connected empty neighbors, just like the original Minesweeper.
-- **Adjacent mine counts** — revealed cells that border at least one mine display the number of mines touching them.
-- **Flagging** — right-click any hidden cell to mark it as a suspected mine (and right-click again to unflag it).
-- **Win/Loss detection** — the game ends the moment you reveal a mine (loss) or reveal every non-mine cell on the board (win).
+- **Flood-fill reveal**, clicking a cell with zero adjacent mines automatically reveals all of its connected empty neighbors, just like the original Minesweeper.
+- **Adjacent mine counts**, revealed cells that border at least one mine display the number of mines touching them.
+- **Flagging**, right-click any hidden cell to mark it as a suspected mine (and right-click again to unflag it).
+- **Win/Loss detection**, the game ends the moment you reveal a mine (loss) or reveal every non-mine cell on the board (win).
 
 ## Installation
 
@@ -49,14 +49,14 @@ A window titled **"Minesweeper"** will open.
 
 ## How to Play / Controls
 
-1. **Set the mine count** — drag the slider handle left/right to choose a mine count between 10 and 20, then click the green **Start** button.
+1. **Set the mine count**, drag the slider handle left/right to choose a mine count between 10 and 20, then click the green **Start** button.
 2. **Left-click** a hidden cell to reveal it.
    - If it's a mine, the game ends immediately.
    - If it's empty (no adjacent mines), all connected empty cells are revealed automatically.
    - If it has adjacent mines, the number of neighboring mines is displayed.
 3. **Right-click** a hidden cell to place or remove a flag (`F`) on a cell you believe contains a mine.
-4. **Win condition** — reveal every cell that does not contain a mine.
-5. **Lose condition** — reveal a cell that contains a mine.
+4. **Win condition**, reveal every cell that does not contain a mine.
+5. **Lose condition**, reveal a cell that contains a mine.
 6. Close the window (or press the window's close button) to quit at any time.
 
 ## Project Documentation
@@ -72,7 +72,7 @@ Additional project documentation for the team lives in the [`docs/`](docs) direc
 
 | Name | Role | GitHub |
 | ---- | ---- | ------ |
-|Felix Balandran|      |        |
+|Felix Balandran|Developer (Documentation)|@flec1115|
 |      |      |        |
 |      |      |        |
 |      |      |        |
