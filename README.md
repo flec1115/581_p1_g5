@@ -73,6 +73,6 @@ Additional project documentation for the team lives in the [`docs/`](docs) direc
 | Name | Role | GitHub |
 | ---- | ---- | ------ |
 |Felix Balandran|Developer (Documentation)|@flec1115|
-|      |      |        |
+|Abdulaziz Arab|Assistant Developer (Documentation)|@REVERSED-HERMIT|
 |      |      |        |
 |      |      |        |
