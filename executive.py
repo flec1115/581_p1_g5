@@ -1,4 +1,3 @@
-
 # from pygame_widgets.slider import Slider
 # from pygame_widgets.textbox import TextBox
 from cell import Cell
@@ -11,14 +10,33 @@ MAX_MINES = 20
 GRID_SIZE = 10
 CELL_SIZE = 40
 WINDOW_SIZE = GRID_SIZE * CELL_SIZE
+#Layout for the retro style: beveled header panel above the board
+BORDER = 12
+HEADER_HEIGHT = 56
+BOARD_X = BORDER
+BOARD_Y = BORDER + HEADER_HEIGHT + BORDER
+WINDOW_WIDTH = WINDOW_SIZE + 2 * BORDER
+WINDOW_HEIGHT = BOARD_Y + WINDOW_SIZE + BORDER
 safe_cells = GRID_SIZE * GRID_SIZE - NUMBER_OF_MINES
 revealed_safe_cells = 0
 
-button_rect = pygame.Rect(100, 150, 200, 60)
-slider_rect = pygame.Rect(100, 220, 200, 20)
-handle_rect = pygame.Rect(100, 210, 20, 40)
-handle_color = (255,0,0)
-slider_color = (200, 200, 200)
+button_rect = pygame.Rect(132, 300, 160, 50)
+slider_rect = pygame.Rect(112, 236, 200, 12)
+handle_rect = pygame.Rect(112, 226, 16, 32)
+handle_color = (196, 194, 188)
+slider_color = (150, 148, 142)
+
+#Retro color palette
+FACE = (196, 194, 188)
+REVEALED = (212, 210, 204)
+HIGHLIGHT = (250, 250, 246)
+SHADOW = (122, 120, 114)
+TEXT_COLOR = (40, 40, 40)
+LED_ON = (255, 170, 30)
+LED_OFF = (70, 40, 10)
+LED_BG = (22, 16, 10)
+NUMBER_COLORS = {1: (30, 60, 200), 2: (20, 125, 40), 3: (200, 30, 30), 4: (30, 30, 120),
+                 5: (120, 30, 30), 6: (20, 120, 120), 7: (20, 20, 20), 8: (110, 110, 110)}
 
 grid = [[Cell() for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
 
@@ -83,51 +101,152 @@ def reveal(input_row, input_col):
 
     return True
 
-def draw_cell(screen, row, col):
-    x = col * CELL_SIZE
-    y = row * CELL_SIZE
+_fonts = {}
+
+
+def get_font(size, bold=False):
+    #Cache fonts so they aren't recreated for every cell every frame
+    if (size, bold) not in _fonts:
+        font = pygame.font.Font(None, size)
+        font.set_bold(bold)
+        _fonts[(size, bold)] = font
+    return _fonts[(size, bold)]
+
+
+def draw_bevel(screen, rect, raised=True, width=3):
+    #Light edge top/left and dark edge bottom/right gives the raised 3D look
+    light, dark = (HIGHLIGHT, SHADOW) if raised else (SHADOW, HIGHLIGHT)
+    for i in range(width):
+        left, top = rect.left + i, rect.top + i
+        right, bottom = rect.right - 1 - i, rect.bottom - 1 - i
+        pygame.draw.line(screen, dark, (left, bottom), (right, bottom))
+        pygame.draw.line(screen, dark, (right, top), (right, bottom))
+        pygame.draw.line(screen, light, (left, top), (right, top))
+        pygame.draw.line(screen, light, (left, top), (left, bottom))
+
+
+def draw_mine(screen, cx, cy):
+    r = CELL_SIZE // 5
+    spike = r + 6
+    for dx, dy in [(1, 0), (0, 1), (0.7, 0.7), (0.7, -0.7)]:
+        pygame.draw.line(screen, (20, 20, 20), (cx - dx * spike, cy - dy * spike),
+                         (cx + dx * spike, cy + dy * spike), 3)
+    pygame.draw.circle(screen, (20, 20, 20), (cx, cy), r)
+    pygame.draw.circle(screen, (235, 235, 235), (cx - r // 3, cy - r // 3), max(2, r // 3))
+
+
+def draw_flag(screen, cx, cy):
+    pygame.draw.rect(screen, (20, 20, 20), (cx - 9, cy + 9, 18, 3))
+    pygame.draw.rect(screen, (20, 20, 20), (cx - 5, cy + 6, 10, 3))
+    pygame.draw.line(screen, (20, 20, 20), (cx + 1, cy - 11), (cx + 1, cy + 7), 2)
+    pygame.draw.polygon(screen, (205, 25, 25), [(cx + 2, cy - 12), (cx + 2, cy - 1), (cx - 10, cy - 6)])
+
+
+SEGMENTS = {"0": "abcdef", "1": "bc", "2": "abged", "3": "abgcd", "4": "fgbc", "5": "afgcd",
+            "6": "afgedc", "7": "abc", "8": "abcdefg", "9": "abcdfg", "-": "g"}
+
+
+def draw_counter(screen, value, x, y):
+    #Three digit seven-segment readout in a sunken box
+    text = "-" + f"{min(-value, 99):02d}" if value < 0 else f"{min(value, 999):03d}"
+    box = pygame.Rect(x, y, 70, 38)
+    pygame.draw.rect(screen, LED_BG, box)
+    draw_bevel(screen, box, raised=False, width=2)
+    w, h, t = 15, 28, 3
+    for i, ch in enumerate(text):
+        sx, sy = x + 7 + i * 20, y + 5
+        segs = {
+            "a": (sx + t, sy, w - 2 * t, t),
+            "b": (sx + w - t, sy + t, t, h // 2 - t),
+            "c": (sx + w - t, sy + h // 2, t, h // 2 - t),
+            "d": (sx + t, sy + h - t, w - 2 * t, t),
+            "e": (sx, sy + h // 2, t, h // 2 - t),
+            "f": (sx, sy + t, t, h // 2 - t),
+            "g": (sx + t, sy + h // 2 - 1, w - 2 * t, t),
+        }
+        for name, r in segs.items():
+            pygame.draw.rect(screen, LED_ON if name in SEGMENTS[ch] else LED_OFF, r)
+
+
+def draw_plate(screen, rect, label, color):
+    pygame.draw.rect(screen, FACE, rect)
+    draw_bevel(screen, rect, raised=True, width=3)
+    text = get_font(26, bold=True).render(label, True, color)
+    screen.blit(text, text.get_rect(center=rect.center))
+
+
+def draw_cell(screen, row, col, outcome=None, exploded=None):
+    x = BOARD_X + col * CELL_SIZE
+    y = BOARD_Y + row * CELL_SIZE
     rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
+    cx, cy = rect.center
     #This block of code was adapted from GitHub CoPilot when asking how to setup a gameboard in pygame
     #All code was subesequently written manually, but it was adapted from the AI
-    if grid[row][col].is_revealed:
+    #The cell visuals were later restyled (bevels, drawn mines and flags) with help from Claude
+    #After a loss, mines are drawn face up here without changing any cell state
+    show_mine = outcome == "lost" and grid[row][col].has_mine and not grid[row][col].is_flagged
+    if grid[row][col].is_revealed or show_mine:
+        bg = (220, 40, 40) if (row, col) == exploded else REVEALED
+        pygame.draw.rect(screen, bg, rect)
+        pygame.draw.rect(screen, SHADOW, rect, 1)
         if grid[row][col].has_mine:
-            pygame.draw.rect(screen, (255, 80, 80), rect)
-            pygame.draw.rect(screen, (0, 0, 0), rect, 2)
-            font = pygame.font.Font(None, 28)
-            text = font.render("*", True, (0, 0, 0))
-            screen.blit(text, (x + 12, y + 6))
-        else:
-            pygame.draw.rect(screen, (207, 194, 154), rect)
-            pygame.draw.rect(screen, (0, 0, 0), rect, 2)
-            if grid[row][col].adjacent_mines > 0:
-                font = pygame.font.Font(None, 28)
-                text = font.render(str(grid[row][col].adjacent_mines), True, (0, 0, 0))
-                screen.blit(text, (x + 14, y + 6))
+            draw_mine(screen, cx, cy)
+        elif grid[row][col].adjacent_mines > 0:
+            n = grid[row][col].adjacent_mines
+            text = get_font(34, bold=True).render(str(n), True, NUMBER_COLORS[n])
+            screen.blit(text, text.get_rect(center=(cx, cy + 1)))
     else:
-        pygame.draw.rect(screen, (76, 175, 80), rect)
-        pygame.draw.rect(screen, (0, 0, 0), rect, 2)
+        pygame.draw.rect(screen, FACE, rect)
+        draw_bevel(screen, rect, raised=True, width=3)
         if grid[row][col].is_flagged:
-            font = pygame.font.Font(None, 28)
-            text = font.render("F", True, (255, 0, 0))
-            screen.blit(text, (x + 10, y + 6))
+            if outcome == "lost" and not grid[row][col].has_mine:
+                #Wrong flag: crossed-out mine
+                draw_mine(screen, cx, cy)
+                pygame.draw.line(screen, (200, 20, 20), (x + 8, y + 8), (x + CELL_SIZE - 9, y + CELL_SIZE - 9), 3)
+                pygame.draw.line(screen, (200, 20, 20), (x + CELL_SIZE - 9, y + 8), (x + 8, y + CELL_SIZE - 9), 3)
+            else:
+                draw_flag(screen, cx, cy)
 
 
-def draw_board(screen):
+def draw_board(screen, outcome=None, exploded=None):
+    board = pygame.Rect(BOARD_X - 3, BOARD_Y - 3, WINDOW_SIZE + 6, WINDOW_SIZE + 6)
+    draw_bevel(screen, board, raised=False, width=3)
     for row in range(GRID_SIZE):
         for col in range(GRID_SIZE):
-            draw_cell(screen, row, col)
+            draw_cell(screen, row, col, outcome, exploded)
+
+
+def draw_header(screen, outcome, seconds):
+    #Mines left on the left, status plate in the middle, timer on the right
+    panel = pygame.Rect(BORDER - 3, BORDER - 3, WINDOW_SIZE + 6, HEADER_HEIGHT + 6)
+    draw_bevel(screen, panel, raised=False, width=3)
+    flags = sum(cell.is_flagged for grid_row in grid for cell in grid_row)
+    draw_counter(screen, NUMBER_OF_MINES - flags, BORDER + 8, BORDER + 9)
+    draw_counter(screen, seconds, WINDOW_WIDTH - BORDER - 78, BORDER + 9)
+    plate = pygame.Rect((WINDOW_WIDTH - 150) // 2, BORDER + 11, 150, 34)
+    if outcome == "won":
+        draw_plate(screen, plate, "You Win!", (20, 125, 40))
+    elif outcome == "lost":
+        draw_plate(screen, plate, "Boom!", (180, 30, 30))
+    else:
+        draw_plate(screen, plate, "Minesweeper", TEXT_COLOR)
 
 
 def run_game():
     global NUMBER_OF_MINES
     pygame.init()
-    screen = pygame.display.set_mode((WINDOW_SIZE, WINDOW_SIZE))
+    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("Minesweeper")
     first_move_done = False
     game_over = False
     dragging=False
     slider_value_picked = False
     slider_value = 10
+    #Display-only state for the header and loss screen
+    outcome = None
+    exploded = None
+    start_ticks = 0
+    seconds = 0
 
     #Game loop set up with reference from Geeks to Geeks PyGame tutorial
     while True:
@@ -159,22 +278,26 @@ def run_game():
 
             
             elif event.type == pygame.MOUSEBUTTONDOWN and not game_over:
-                col = event.pos[0]//CELL_SIZE
-                row = event.pos[1]//CELL_SIZE
+                col = (event.pos[0] - BOARD_X)//CELL_SIZE
+                row = (event.pos[1] - BOARD_Y)//CELL_SIZE
 
                 if 0 <= row < GRID_SIZE and 0 <= col < GRID_SIZE:
                     if event.button == 1:
                         if not first_move_done:
                             first_click(row, col)
                             first_move_done = True
+                            start_ticks = pygame.time.get_ticks()
                         else:
                             result = reveal(row, col)
                             if not result:
                                 game_over = True
                                 print("Boom.")
+                                outcome = "lost"
+                                exploded = (row, col)
                             elif result == "win":
                                 game_over = True
                                 print("You win!")
+                                outcome = "won"
                     elif event.button == 3:
                         if grid[row][col].is_flagged:
                             grid[row][col].is_flagged = False
@@ -182,19 +305,27 @@ def run_game():
                             grid[row][col].is_flagged = True
         if not slider_value_picked:
             #draw the slider
-            screen.fill((255,255,255))
+            screen.fill(FACE)
+            draw_bevel(screen, pygame.Rect(BORDER, BORDER, WINDOW_SIZE, WINDOW_HEIGHT - 2 * BORDER), raised=False)
+            title = get_font(64).render("MINESWEEPER", True, TEXT_COLOR)
+            screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 80)))
+            draw_mine(screen, WINDOW_WIDTH // 2, 132)
+            label = get_font(28, bold=True).render("Mines:", True, TEXT_COLOR)
+            screen.blit(label, label.get_rect(midright=(WINDOW_WIDTH // 2 - 6, 190)))
+            draw_counter(screen, slider_value, WINDOW_WIDTH // 2 + 4, 171)
             pygame.draw.rect(screen, slider_color, slider_rect)
+            draw_bevel(screen, slider_rect, raised=False, width=2)
             pygame.draw.rect(screen, handle_color, handle_rect)
-            font = pygame.font.SysFont(None, 36)
-            text = font.render(f"Mine Count: {slider_value}", True, (0, 0, 0))
-            screen.blit(text, (slider_rect.x, slider_rect.y + 40))
+            draw_bevel(screen, handle_rect)
 
             #draw the start button
-            pygame.draw.rect(screen, (73,204,3), button_rect)
-            font = pygame.font.SysFont(None, 32)
-            text = font.render("Start", True, (255,255,255))
-            text_rect = text.get_rect(center=button_rect.center)
-            screen.blit(text, text_rect)
+            draw_plate(screen, button_rect, "Start", TEXT_COLOR)
+            hint = get_font(22).render("Left click: reveal    Right click: flag", True, (80, 80, 80))
+            screen.blit(hint, hint.get_rect(center=(WINDOW_WIDTH // 2, WINDOW_HEIGHT - 40)))
         else:
-            draw_board(screen)
+            if first_move_done and not game_over:
+                seconds = min(999, (pygame.time.get_ticks() - start_ticks) // 1000)
+            screen.fill(FACE)
+            draw_header(screen, outcome, seconds)
+            draw_board(screen, outcome, exploded)
         pygame.display.flip()
