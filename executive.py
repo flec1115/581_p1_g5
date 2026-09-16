@@ -17,7 +17,7 @@ BOARD_X = BORDER
 BOARD_Y = BORDER + HEADER_HEIGHT + BORDER
 WINDOW_WIDTH = WINDOW_SIZE + 2 * BORDER
 WINDOW_HEIGHT = BOARD_Y + WINDOW_SIZE + BORDER
-safe_cells = GRID_SIZE * GRID_SIZE - NUMBER_OF_MINES
+SAFE_CELLS = GRID_SIZE * GRID_SIZE - NUMBER_OF_MINES
 revealed_safe_cells = 0
 
 button_rect = pygame.Rect(132, 300, 160, 50)
@@ -96,7 +96,7 @@ def reveal(input_row, input_col):
 
     recursive_sweep(input_row, input_col)
 
-    if revealed_safe_cells == safe_cells:
+    if revealed_safe_cells == SAFE_CELLS:
         return "win"
 
     return True
@@ -234,6 +234,7 @@ def draw_header(screen, outcome, seconds):
 
 def run_game():
     global NUMBER_OF_MINES
+    global SAFE_CELLS
     pygame.init()
     screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption("Minesweeper")
@@ -274,6 +275,8 @@ def run_game():
 
                 if slider_value_picked:
                     NUMBER_OF_MINES = slider_value
+                    SAFE_CELLS=GRID_SIZE * GRID_SIZE - NUMBER_OF_MINES
+
                     
 
             
