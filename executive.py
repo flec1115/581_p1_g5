@@ -13,9 +13,10 @@ WINDOW_SIZE = GRID_SIZE * CELL_SIZE
 #Layout for the retro style: beveled header panel above the board
 BORDER = 12
 HEADER_HEIGHT = 56
-BOARD_X = BORDER
-BOARD_Y = BORDER + HEADER_HEIGHT + BORDER
-WINDOW_WIDTH = WINDOW_SIZE + 2 * BORDER
+LABEL_SIZE = 24
+BOARD_X = BORDER + LABEL_SIZE
+BOARD_Y = BORDER + HEADER_HEIGHT + BORDER + LABEL_SIZE
+WINDOW_WIDTH = BOARD_X + WINDOW_SIZE + BORDER
 WINDOW_HEIGHT = BOARD_Y + WINDOW_SIZE + BORDER
 SAFE_CELLS = GRID_SIZE * GRID_SIZE - NUMBER_OF_MINES
 revealed_safe_cells = 0
@@ -39,7 +40,6 @@ NUMBER_COLORS = {1: (30, 60, 200), 2: (20, 125, 40), 3: (200, 30, 30), 4: (30, 3
                  5: (120, 30, 30), 6: (20, 120, 120), 7: (20, 20, 20), 8: (110, 110, 110)}
 
 grid = [[Cell() for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
-
 
 def recursive_sweep(r, c):
     global revealed_safe_cells
@@ -215,10 +215,27 @@ def draw_board(screen, outcome=None, exploded=None):
         for col in range(GRID_SIZE):
             draw_cell(screen, row, col, outcome, exploded)
 
+def draw_labels(screen):
+    #Column letters (A-J) above the board, row numbers (1-10) to the left
+    font = get_font(20, bold=True)
+    for col in range(GRID_SIZE):
+        letter = chr(ord('A') + col)
+        text = font.render(letter, True, TEXT_COLOR)
+        x = BOARD_X + col * CELL_SIZE + CELL_SIZE // 2
+        y = BOARD_Y - LABEL_SIZE // 2 - 2
+        screen.blit(text, text.get_rect(center=(x, y)))
+
+    for row in range(GRID_SIZE):
+        number = str(row + 1)
+        text = font.render(number, True, TEXT_COLOR)
+        x = BOARD_X - LABEL_SIZE // 2 - 2
+        y = BOARD_Y + row * CELL_SIZE + CELL_SIZE // 2
+        screen.blit(text, text.get_rect(center=(x, y)))
+
 
 def draw_header(screen, outcome, seconds):
     #Mines left on the left, status plate in the middle, timer on the right
-    panel = pygame.Rect(BORDER - 3, BORDER - 3, WINDOW_SIZE + 6, HEADER_HEIGHT + 6)
+    panel = pygame.Rect(BORDER - 3, BORDER - 3, WINDOW_WIDTH - 2 * BORDER + 6, HEADER_HEIGHT + 6)
     draw_bevel(screen, panel, raised=False, width=3)
     flags = sum(cell.is_flagged for grid_row in grid for cell in grid_row)
     draw_counter(screen, NUMBER_OF_MINES - flags, BORDER + 8, BORDER + 9)
@@ -286,30 +303,32 @@ def run_game():
 
                 if 0 <= row < GRID_SIZE and 0 <= col < GRID_SIZE:
                     if event.button == 1:
-                        if not first_move_done:
-                            first_click(row, col)
-                            first_move_done = True
-                            start_ticks = pygame.time.get_ticks()
-                        else:
-                            result = reveal(row, col)
-                            if not result:
-                                game_over = True
-                                print("Boom.")
-                                outcome = "lost"
-                                exploded = (row, col)
-                            elif result == "win":
-                                game_over = True
-                                print("You win!")
-                                outcome = "won"
+                        if not grid[row][col].is_flagged:
+                            if not first_move_done:
+                                first_click(row, col)
+                                first_move_done = True
+                                start_ticks = pygame.time.get_ticks()
+                            else:
+                                result = reveal(row, col)
+                                if not result:
+                                    game_over = True
+                                    print("Boom.")
+                                    outcome = "lost"
+                                    exploded = (row, col)
+                                elif result == "win":
+                                    game_over = True
+                                    print("You win!")
+                                    outcome = "won"
                     elif event.button == 3:
-                        if grid[row][col].is_flagged:
-                            grid[row][col].is_flagged = False
-                        else:
-                            grid[row][col].is_flagged = True
+                        if not grid[row][col].is_revealed:
+                            if grid[row][col].is_flagged:
+                                grid[row][col].is_flagged = False
+                            else:
+                                grid[row][col].is_flagged = True
         if not slider_value_picked:
             #draw the slider
             screen.fill(FACE)
-            draw_bevel(screen, pygame.Rect(BORDER, BORDER, WINDOW_SIZE, WINDOW_HEIGHT - 2 * BORDER), raised=False)
+            draw_bevel(screen, pygame.Rect(BORDER, BORDER, WINDOW_WIDTH - 2 * BORDER, WINDOW_HEIGHT - 2 * BORDER), raised=False)
             title = get_font(64).render("MINESWEEPER", True, TEXT_COLOR)
             screen.blit(title, title.get_rect(center=(WINDOW_WIDTH // 2, 80)))
             draw_mine(screen, WINDOW_WIDTH // 2, 132)
@@ -330,5 +349,6 @@ def run_game():
                 seconds = min(999, (pygame.time.get_ticks() - start_ticks) // 1000)
             screen.fill(FACE)
             draw_header(screen, outcome, seconds)
+            draw_labels(screen)
             draw_board(screen, outcome, exploded)
         pygame.display.flip()
