@@ -75,4 +75,5 @@ Additional project documentation for the team lives in the [`docs/`](docs) direc
 |Felix Balandran|Developer (Documentation)|@flec1115|
 |Abdulaziz Arab|Assistant Developer (Documentation)|@REVERSED-HERMIT|
 |Jamareon Davis|UI Development|@jamareond|
+|William Grimsley|Backend Development|@wkgrimsley|
 |      |      |        |
