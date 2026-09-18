@@ -1,33 +1,45 @@
 # from pygame_widgets.slider import Slider
 # from pygame_widgets.textbox import TextBox
-from cell import Cell
+
+from cell import Cell # Import cell class from project folder
 import random
 import pygame
 
-NUMBER_OF_MINES = 10
+#Comment types: Critical, Editable, Optional, Explanation
+
+# Editable: This block of code is editable. These are the default values
+NUMBER_OF_MINES = 10 # Editable: Default mine count for the grid size (10). This can be changed by the player using the slider, or by future improvisers/maintainers. It's value is later dependent on slider_value
 MIN_MINES = 10
 MAX_MINES = 20
-GRID_SIZE = 10
-CELL_SIZE = 40
-WINDOW_SIZE = GRID_SIZE * CELL_SIZE
+GRID_SIZE = 10 # Editable: Default grid size 10x10
+CELL_SIZE = 40 # Editable: Default cell size 40x40 pixels per cell
+
+
+WINDOW_SIZE = GRID_SIZE * CELL_SIZE # Critical/Editable: The values multiplied may be changed, but the logic is critical
+
+
 #Layout for the retro style: beveled header panel above the board
-BORDER = 12
-HEADER_HEIGHT = 56
-LABEL_SIZE = 24
-BOARD_X = BORDER + LABEL_SIZE
-BOARD_Y = BORDER + HEADER_HEIGHT + BORDER + LABEL_SIZE
+BORDER = 12 # Editable: Default border size
+HEADER_HEIGHT = 56 # Editable: Default Header Height
+LABEL_SIZE = 24 # Editable: UI Font size
+BOARD_X = BORDER + LABEL_SIZE # Critical: logic for border position
+BOARD_Y = BORDER + HEADER_HEIGHT + BORDER + LABEL_SIZE # Critical: logic for border position
 WINDOW_WIDTH = BOARD_X + WINDOW_SIZE + BORDER
 WINDOW_HEIGHT = BOARD_Y + WINDOW_SIZE + BORDER
-SAFE_CELLS = GRID_SIZE * GRID_SIZE - NUMBER_OF_MINES
-revealed_safe_cells = 0
+SAFE_CELLS = GRID_SIZE * GRID_SIZE - NUMBER_OF_MINES # Critical: calculates non-mine cells. Logic defines game structure. Can't be changed. Excludes mines from the count of cells in the grid
+revealed_safe_cells = 0 # Critical: Counter for measuring progress towards end-game. Initializes with player's first click. Guaranteeing a safe start. 
 
-button_rect = pygame.Rect(132, 300, 160, 50)
-slider_rect = pygame.Rect(112, 236, 200, 12)
-handle_rect = pygame.Rect(112, 226, 16, 32)
-handle_color = (196, 194, 188)
-slider_color = (150, 148, 142)
+# Button/Slider Initialization
+# Details may be changed depending on intent and plans
+# Format = feature(x, y, width, height) , (position and size)
+button_rect = pygame.Rect(132, 300, 160, 50) # Position the start button below the mine count selector
+slider_rect = pygame.Rect(112, 236, 200, 12) # Defines the draggable slider handle. 
+handle_rect = pygame.Rect(112, 226, 16, 32) # Editable: Create draggable handle for changing mine count
+handle_color = (196, 194, 188) # Editable: Sets the slider handle to a light gray color.
+slider_color = (150, 148, 142) # Editable Medium grat slider exterior
 
 #Retro color palette
+# Editable 
 FACE = (196, 194, 188)
 REVEALED = (212, 210, 204)
 HIGHLIGHT = (250, 250, 246)
@@ -40,71 +52,86 @@ NUMBER_COLORS = {1: (30, 60, 200), 2: (20, 125, 40), 3: (200, 30, 30), 4: (30, 3
                  5: (120, 30, 30), 6: (20, 120, 120), 7: (20, 20, 20), 8: (110, 110, 110)}
 
 grid = [[Cell() for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
+# Critical: Creates board, given each iteration is of cell class, using the range of the grid
 
-def recursive_sweep(r, c):
+def recursive_sweep(input_row, c): # Critical Function: recursively searches for adjacent safe cells using current cell's position
     global revealed_safe_cells
 
-    if grid[r][c].is_revealed:
-        return
+    if grid[input_row][c].is_revealed:
+        return # Critical: Base Case - if grid is revealed, skip it
 
-    grid[r][c].is_revealed = True
-    revealed_safe_cells += 1
-    if grid[r][c].adjacent_mines > 0:
-        return
-    else:
-        for row_offset in [-1, 0, 1]:
-            for col_offset in [-1, 0, 1]:
+    grid[input_row][c].is_revealed = True # Base Case - If a cell is revealed and safe (next line)
+    revealed_safe_cells += 1 # Base Case - Increment safe cell count. True is used here to represent a cell's safeness
+  
+    if grid[input_row][input_col].adjacent_mines > 0:
+        return # Base Case - if adjacent cells have at least one mine, stop recursion
+      
+    else: # Otherwise, initiate recursive case
+        for row_offset in [-1, 0, 1]: # With respect to adjacent cells (left and right),
+            for col_offset in [-1, 0, 1]: # With respect to adjacent cells (up and down)
+              
                 if row_offset == 0 and col_offset == 0:
-                    continue
-                if 0 <= r + row_offset < GRID_SIZE and 0 <= c + col_offset < GRID_SIZE:
-                    recursive_sweep(r+row_offset, c+col_offset)
+                    continue # Skip current tile
+                  
+                if 0 <= input_row + row_offset < GRID_SIZE and 0 <= input_col + col_offset < GRID_SIZE:
+                    recursive_sweep(input_row + row_offset, input_col + col_offset)
+                    # Check if adjacent cells are inside of the grid (with respect to vertical & horizontal position) before sweeping
+# Function recursive_sweep(row ,column)
+# Function used (r,c) as parameter, and different functions moved on to use (input_row,input_col)
+# for the sake of consistency and readability, I've changed all row,column variables/parameters to be: (input_row, input_col)
 
 
-def first_click(input_row, input_col):
-    protected = set()
+def first_click(input_row, input_col): #Critical Function: logic initializing what happens with the first click
+    protected = set() # Member Check: set used to keep account of safe cells of the first click 
     for row_offset in [-1, 0, 1]:
         for col_offset in [-1, 0, 1]:
             if 0 <= input_row + row_offset < GRID_SIZE and 0 <= input_col + col_offset < GRID_SIZE:
                 protected.add((input_row+row_offset, input_col+col_offset)) 
+    # Safeguard surrounding cells of the first click          
 
     possible = []
     for i in range(GRID_SIZE):
         for j in range(GRID_SIZE):
             if (i, j) not in protected:
                 possible.append((i, j))
+    # If current cell in grid is not protected, then it could be a mine
+    # Uses list to preserve order           
 
     mine_locations = random.sample(possible, NUMBER_OF_MINES)
     for i, j in mine_locations:
         grid[i][j].has_mine = True
+    # Place the necessary number of mines randomly on non-protected cells (possibly unsafe)  
 
     for i in range(GRID_SIZE):
-        for j in range(GRID_SIZE):
+        for j in range(GRID_SIZE): # With respect to the Grid(x,y) and adjacent cells
             for row_offset in [-1, 0, 1]:
                 for col_offset in [-1, 0, 1]:
                     if row_offset == 0 and col_offset == 0:
-                        continue
-                    if 0 <= i + row_offset < GRID_SIZE and 0 <= j + col_offset < GRID_SIZE:
-                        if grid[i+row_offset][j+col_offset].has_mine:
-                            grid[i][j].adjacent_mines += 1
+                        continue # Skip current cells
+                    if 0 <= i + row_offset < GRID_SIZE and 0 <= j + col_offset < GRID_SIZE: # Explanation: Checks cells inside the grid first to avoid indexing errors
+                        if grid[i+row_offset][j+col_offset].has_mine: # Then checks if there is a mine
+                            grid[i][j].adjacent_mines += 1 # If so, increment adjacent mine count
+                    # Can be reduced to one if statement, but this can also help with readability and understanding the process      
 
     recursive_sweep(input_row, input_col)
+  # Start flood filled, recursive reveal from the first clicked cell
 
 
-def reveal(input_row, input_col):
+def reveal(input_row, input_col): # Critical Function: Uses the recursive sweeps to reveal mines.
     if grid[input_row][input_col].has_mine:
-        return False
+        return False # Base Case - if the cell has a mine
 
-    recursive_sweep(input_row, input_col)
+    recursive_sweep(input_row, input_col) # Uses the recursive sweeps to reveal mines.
 
     if revealed_safe_cells == SAFE_CELLS:
         return "win"
+    # If all of the safe cells have been revealed, end the game announcing the player's win  
 
     return True
 
 _fonts = {}
-
-
-def get_font(size, bold=False):
+# Used for get_font
+def get_font(size, bold=False): # Editable function: returns cache font for 
     #Cache fonts so they aren't recreated for every cell every frame
     if (size, bold) not in _fonts:
         font = pygame.font.Font(None, size)
@@ -113,7 +140,7 @@ def get_font(size, bold=False):
     return _fonts[(size, bold)]
 
 
-def draw_bevel(screen, rect, raised=True, width=3):
+def draw_bevel(screen, rect, raised=True, width=3): # Editable: Draws Bevel(self explanatory)
     #Light edge top/left and dark edge bottom/right gives the raised 3D look
     light, dark = (HIGHLIGHT, SHADOW) if raised else (SHADOW, HIGHLIGHT)
     for i in range(width):
@@ -144,6 +171,8 @@ def draw_flag(screen, cx, cy):
 
 SEGMENTS = {"0": "abcdef", "1": "bc", "2": "abged", "3": "abgcd", "4": "fgbc", "5": "afgcd",
             "6": "afgedc", "7": "abc", "8": "abcdefg", "9": "abcdfg", "-": "g"}
+# Display each number of a cell with a certain aesthetic
+
 
 
 def draw_counter(screen, value, x, y):
@@ -249,7 +278,7 @@ def draw_header(screen, outcome, seconds):
         draw_plate(screen, plate, "Minesweeper", TEXT_COLOR)
 
 
-def run_game():
+def run_game(): # Critical function: 
     global NUMBER_OF_MINES
     global SAFE_CELLS
     pygame.init()
