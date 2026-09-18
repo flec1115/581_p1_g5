@@ -76,4 +76,4 @@ Additional project documentation for the team lives in the [`docs/`](docs) direc
 |Abdulaziz Arab|Assistant Developer (Documentation)|@REVERSED-HERMIT|
 |Jamareon Davis|UI Development|@jamareond|
 |William Grimsley|Backend Development|@wkgrimsley|
-|      |      |        |
+| John Philip Vitha|Backend Development|@johnvitha2|
