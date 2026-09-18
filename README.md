@@ -34,7 +34,7 @@ These steps assume you have [Python 3](https://www.python.org/downloads/) instal
 3. **Install dependencies**
 
    ```bash
-   pip install pygame pygame-widgets
+   pip install pygame
    ```
 
 ## Running the Game
