@@ -57,16 +57,20 @@ handle_rect = pygame.Rect(112, 226, 16, 32) # Editable: Create draggable handle 
 handle_color = (196, 194, 188) # Editable: Sets the slider handle to a light gray color.
 slider_color = (150, 148, 142) # Editable Medium grat slider exterior
 
+
 #Retro color palette
-# Editable 
-FACE = (196, 194, 188)
-REVEALED = (212, 210, 204)
+FACE = (196, 194, 188) 
+REVEALED = (212, 210, 204) 
 HIGHLIGHT = (250, 250, 246)
+#Editable: Displays varying shades of grey for the aesthetic minesweeper aesthetic
+
 SHADOW = (122, 120, 114)
 TEXT_COLOR = (40, 40, 40)
+
 LED_ON = (255, 170, 30)
 LED_OFF = (70, 40, 10)
 LED_BG = (22, 16, 10)
+
 NUMBER_COLORS = {1: (30, 60, 200), 2: (20, 125, 40), 3: (200, 30, 30), 4: (30, 30, 120),
                  5: (120, 30, 30), 6: (20, 120, 120), 7: (20, 20, 20), 8: (110, 110, 110)}
 
@@ -297,17 +301,23 @@ def draw_header(screen, outcome, seconds):
         draw_plate(screen, plate, "Minesweeper", TEXT_COLOR)
 
 
-def run_game(): # Critical function: 
-    global NUMBER_OF_MINES
+def run_game(): 
+        
+    global NUMBER_OF_MINES # Critical: Variable is effected throughout multiple functions and thus should stay global
     global SAFE_CELLS
+    # Variable is effected throughout multiple functions and thus should stay global
+
+     # This block initializes the starting conditions of the game; as a window of a certain size displaying what it's for, and starting off with most conditions being at zero or the bare minimum   
     pygame.init()
-    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    pygame.display.set_caption("Minesweeper")
-    first_move_done = False
-    game_over = False
-    dragging=False
-    slider_value_picked = False
+    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT)) # Initializes the size of the window to be the size of the board
+    pygame.display.set_caption("Minesweeper") # Set window name to be "Minesweeper"
+    first_move_done = False # Game starts off letting the user do the first move
+    game_over = False # Game starts off as active/playable until player loses
+        
+    dragging=False # Starts off with the slider being motionless
+    slider_value_picked = False 
     slider_value = 10
+        
     #Display-only state for the header and loss screen
     outcome = None
     exploded = None
@@ -316,10 +326,12 @@ def run_game(): # Critical function:
 
     #Game loop set up with reference from Geeks to Geeks PyGame tutorial
     while True:
+            
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
+                    
             if not slider_value_picked:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if handle_rect.collidepoint(event.pos):
