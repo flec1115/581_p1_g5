@@ -72,8 +72,9 @@ Additional project documentation for the team lives in the [`docs/`](docs) direc
 
 | Name | Role | GitHub |
 | ---- | ---- | ------ |
-|Felix Balandran|Developer (Documentation)|@flec1115|
-|Abdulaziz Arab|Assistant Developer (Documentation)|@REVERSED-HERMIT|
-|Jamareon Davis|UI Development|@jamareond|
-|William Grimsley|Backend Development|@wkgrimsley|
-| John Philip Vitha|Backend Development|@johnvitha2|
+|Abdulaziz Arab|Technical Writer|@REVERSED-HERMIT|
+|Riley Backus|Software Tester|@rileybackus96|
+|Felix Balandran|Technical Writer|@flec1115|
+|Jamareon Davis|UI Developer|@jamareond|
+|William Grimsley|Frontend Developer|@wkgrimsley|
+|John Vitha|Backend Developer|@johnvitha2|
