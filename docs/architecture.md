@@ -22,7 +22,7 @@ PyGame follows a loop of updating constantly. Whenever the user moves anything, 
 
 - First click is protected from mines and ensures it is not surrounded by mines to make the game winnable.
 - Empty spaces are filled in using a recursive flood fill to clear all adjoining non mine connected spaces
-- The board is 10x10 and can accommodate 10-20 mines depending on user input.
+- The board is 10x10 grid handled by a 2D array and can accommodate 10-20 mines depending on user input.
 - PyGame was used for this to make a simple UI that is streamlined and easy to follow
 
 ## Known Limitations / Future Work
