@@ -17,8 +17,6 @@ External Sources: W3Schools Pygame Tutorial for reference in initializing PyGame
 Authors: Abdulaziz Arab, Felix Balandran, Jamareon Davis, John Vitha, Riley Backus, William Grimsley
 Creation Date: September 9, 2026
 '''
-# from pygame_widgets.slider import Slider
-# from pygame_widgets.textbox import TextBox
 
 from cell import Cell # Import cell class from project folder
 import random
