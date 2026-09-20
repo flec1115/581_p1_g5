@@ -12,7 +12,7 @@ Outputs: Before starting, outputs page with slider for user to select mine count
 
 External Sources: W3Schools Pygame Tutorial for reference in initializing PyGame: https://www.geeksforgeeks.org/python/pygame-tutorial/
                   AI Usage: ChatGPT with GPT-5.6 Luna Used for creating basic template for PyGame board - further comments in code
-                            Claude with [Insert model here] Used for updating UI to match old school minesweeper style
+                            Claude Used for updating UI to match old school minesweeper style
 
 Authors: Abdulaziz Arab, Felix Balandran, Jamareon Davis, John Vitha, Riley Backus, William Grimsley
 Creation Date: September 9, 2026
