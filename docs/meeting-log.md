@@ -33,8 +33,8 @@ Check in on individual progress, iron out what needs to get done before due date
 
 **Action Items:**
 
-- Implement refresh button
-- Fix flagged mine logic, user should not click on flag
+- Fix flagged mine logic, user should not be able to activate flagged mine
 - Comment code further
-- Label rows
+- Label rows and columns on the board
 - Stress test mine count
+- Fix mine count bug
