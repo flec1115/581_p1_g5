@@ -1,8 +1,8 @@
 # Hours Actual
 
 
-| Task | Assigned To | Actual Hours | Notes |
-| ---- | ----------- | ------------- | ----- |
+| Task | Assigned To | Actual Hours |
+| ---- | ----------- | ------------- | 
 |   Backend Development   | John Vitha | 3 hours |
 |   Frontend Development   | Bill Grimsley | 3 hours  | 
 |   Project Documentation | Felix Balandran | 3 hours |      
