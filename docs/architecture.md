@@ -1,6 +1,6 @@
 # Architecture
 
-> Skeleton — fill in as the design solidifies.
+> As the program is now
 
 ## Overview
 
