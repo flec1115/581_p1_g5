@@ -3,8 +3,12 @@
 
 | Task | Assigned To | Actual Hours | Notes |
 | ---- | ----------- | ------------- | ----- |
-|   Backend Development   | John Vitha and William Grimsley | 6 Hours combined | John: 3 hours ; William: 3 hours |
-|      |             |               |       |
-|      |             |               |       |
+|   Backend Development   | John Vitha | 3 hours |
+|   Frontend Development   | Bill Grimsley | 3 hours  | 
+|   Project Documentation | Felix Balandran | 3 hours |      
+|   Code Documentation | Abdulaziz Arab | 5 hours |    
+|   UI Development | Jamareon Davis | 3 hours |      
+|   Testing and Debugging | Riley Backus | 2 hours |       
 
-**Total Actual Hours:**
+
+Total Actual Hours: 19 hours
