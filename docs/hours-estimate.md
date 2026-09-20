@@ -1,7 +1,7 @@
 # Hours Estimate
 
 
-| Task | Assigned To | Estimated |
+| Task | Assigned To | Estimated Hours|
 | ---- | ----------- | ------------- | 
 |   Backend Development   | John Vitha | 3 hours |
 |   Frontend Development   | Bill Grimsley | 3 hours  | 
