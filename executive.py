@@ -25,12 +25,12 @@ import pygame
 
 #Comment types: Critical, Editable, Optional, Explanation
 
-# Editable: This block of code is editable. These are the default values
+# Editable: This block of code is editable. These are the default values. board starts with each cell being 40x40 pixels, with a board that is 10x10
 NUMBER_OF_MINES = 10 # Editable: Default mine count for the grid size (10). This can be changed by the player using the slider, or by future improvisers/maintainers. It's value is later dependent on slider_value
 MIN_MINES = 10
 MAX_MINES = 20
-GRID_SIZE = 10 # Editable: Default grid size 10x10
-CELL_SIZE = 40 # Editable: Default cell size 40x40 pixels per cell
+GRID_SIZE = 10 
+CELL_SIZE = 40 
 
 
 WINDOW_SIZE = GRID_SIZE * CELL_SIZE # Critical/Editable: The values multiplied may be changed, but the logic is critical
@@ -42,8 +42,8 @@ HEADER_HEIGHT = 56 # Editable: Default Header Height
 LABEL_SIZE = 24 # Editable: UI Font size
 BOARD_X = BORDER + LABEL_SIZE # Critical: logic for border position
 BOARD_Y = BORDER + HEADER_HEIGHT + BORDER + LABEL_SIZE # Critical: logic for border position
-WINDOW_WIDTH = BOARD_X + WINDOW_SIZE + BORDER
-WINDOW_HEIGHT = BOARD_Y + WINDOW_SIZE + BORDER
+WINDOW_WIDTH = BOARD_X + WINDOW_SIZE + BORDER # Critical: adds all widths together to determine window width 
+WINDOW_HEIGHT = BOARD_Y + WINDOW_SIZE + BORDER # Critical: adds all heights together to determine window height 
 SAFE_CELLS = GRID_SIZE * GRID_SIZE - NUMBER_OF_MINES # Critical: calculates non-mine cells. Logic defines game structure. Can't be changed. Excludes mines from the count of cells in the grid
 revealed_safe_cells = 0 # Critical: Counter for measuring progress towards end-game. Initializes with player's first click. Guaranteeing a safe start. 
 
@@ -330,7 +330,11 @@ def run_game():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
-                    
+         # As long as the player doesn't quit, return every other action/event type           
+
+
+
+         # Checks for slider value picking by waiting for user input through the mouse
             if not slider_value_picked:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if handle_rect.collidepoint(event.pos):
@@ -345,22 +349,26 @@ def run_game():
                     #It was then edited to use mouse_x as it was initially event.pos[0] but mouse_x is used multiple times
                     handle_rect.x = max(slider_rect.x, min(mouse_x - handle_rect.width//2, slider_rect.right - handle_rect.width))
 
+                     # slider works on a scale of a precentage, and here its being defined in terms of functionality   
                     slider_percent = (mouse_x - slider_rect.x) / slider_rect.width
                     slider_percent = max(0, min(1, slider_percent))
                     slider_value = round(MIN_MINES + slider_percent * (MAX_MINES - MIN_MINES))
 
+                    # Determine/set slider value and associate it with the number of mines, then calculate the number of safe cells
                 if slider_value_picked:
                     NUMBER_OF_MINES = slider_value
                     SAFE_CELLS=GRID_SIZE * GRID_SIZE - NUMBER_OF_MINES
 
                     
 
-            
+            # If player clicks anywhere in the game and it doesn't end (can be revealing tile or clicking on the window or a revealed tile), 
             elif event.type == pygame.MOUSEBUTTONDOWN and not game_over:
                 col = (event.pos[0] - BOARD_X)//CELL_SIZE
                 row = (event.pos[1] - BOARD_Y)//CELL_SIZE
 
-                if 0 <= row < GRID_SIZE and 0 <= col < GRID_SIZE:
+
+                    # Bound check: making sure the mouse click is on a valid cell, the first move, if the tile is flagged before the logic occurs
+                if 0 <= row < GRID_SIZE and 0 <= col < GRID_SIZE: 
                     if event.button == 1:
                         if not grid[row][col].is_flagged:
                             if not first_move_done:
@@ -384,6 +392,7 @@ def run_game():
                                 grid[row][col].is_flagged = False
                             else:
                                 grid[row][col].is_flagged = True
+                                    
         if not slider_value_picked:
             #draw the slider
             screen.fill(FACE)
